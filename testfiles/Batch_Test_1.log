@@ -1,0 +1,22 @@
+LTspice 26.0.1 for Windows
+Circuit: C:\sandbox\PyLTSpice\examples\testfiles\Batch_Test_1.net
+Start Time: Sun Mar 22 16:18:27 2026
+solver = Normal
+Maximum thread count: 16
+tnom = 27
+temp = 27
+method = modified trap
+Compress1stOrder = true
+Compress2ndOrder = true
+Direct Newton iteration succeeded in finding operating point.
+Total elapsed time: 0.087 seconds.
+
+Files loaded:
+C:\sandbox\PyLTSpice\examples\testfiles\Batch_Test_1.net
+C:\Users\nunob\AppData\Local\LTspice\lib\sub\ADI1.lib
+
+vout_rms: RMS(V(OUT))=1.4110914382 FROM 0 TO 0.001
+vin_rms: RMS(V(IN))=0.70622014227 FROM 0 TO 0.001
+gain: Vout_rms/Vin_rms=1.99809004833
+vout1m: V(OUT) =-0.0186233855784 at 0.001
+period: time =1.5653513456e-08 at 1.5653513456e-08

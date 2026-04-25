@@ -1,0 +1,16 @@
+LTspice 26.0.1 for Windows
+Circuit: C:\sandbox\PyLTSpice\examples\testfiles\DC op point_1.net
+Start Time: Sun Mar 22 16:18:30 2026
+solver = Normal
+Maximum thread count: 16
+tnom = 27
+temp = 27
+method = modified trap
+Compress1stOrder = true
+Compress2ndOrder = true
+Direct Newton iteration succeeded in finding operating point.
+Total elapsed time: 0.014 seconds.
+
+Files loaded:
+C:\sandbox\PyLTSpice\examples\testfiles\DC op point_1.net
+
