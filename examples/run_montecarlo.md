@@ -1,0 +1,43 @@
+# run_montecarlo.py via ltspice_mcp
+
+Use this for LLMs in OpenCode, OpenAI Codex, or Claude Code.
+
+## Goal
+Replicate README Montecarlo setup and execution flow through MCP.
+
+## Preconditions
+- MCP server `ltspice_mcp` is connected.
+- File: `/home/brosnan/ltspice_mcp/ltspice_mcp/testfiles/sallenkey.asc`
+
+## Step-by-step
+1. Create AscEditor object:
+```json
+{"tool":"execute","arguments":{"api_name":"AscEditor","inputs":{"new_object_name":"sallenkey","asc_file":"/home/brosnan/ltspice_mcp/ltspice_mcp/testfiles/sallenkey.asc"}}}
+```
+2. Create SimRunner:
+```json
+{"tool":"execute","arguments":{"api_name":"SimRunner","inputs":{"new_object_name":"runner_mc","output_folder":"/home/brosnan/ltspice_mcp/ltspice_mcp/testfiles/temp_mc"}}}
+```
+3. Create Montecarlo object:
+```json
+{"tool":"execute","arguments":{"api_name":"Montecarlo","inputs":{"new_object_name":"mc","circuit_file":"sallenkey","runner":"runner_mc"}}}
+```
+4. Poll `execute_status` after each call.
+5. Set tolerances:
+```json
+{"tool":"execute","arguments":{"api_name":"set_tolerance","inputs":{"object_name":"mc","ref":"R","new_tolerance":0.01}}}
+```
+```json
+{"tool":"execute","arguments":{"api_name":"set_tolerance","inputs":{"object_name":"mc","ref":"C","new_tolerance":0.1,"distribution":"uniform"}}}
+```
+```json
+{"tool":"execute","arguments":{"api_name":"set_tolerance","inputs":{"object_name":"mc","ref":"V","new_tolerance":0.1,"distribution":"normal"}}}
+```
+6. Optional run steps (requires simulator):
+```json
+{"tool":"execute","arguments":{"api_name":"prepare_testbench","inputs":{"object_name":"mc","num_runs":1000}}}
+```
+```json
+{"tool":"execute","arguments":{"api_name":"run_testbench","inputs":{"object_name":"mc","runs_per_sim":100}}}
+```
+7. Poll after each call and inspect final status.

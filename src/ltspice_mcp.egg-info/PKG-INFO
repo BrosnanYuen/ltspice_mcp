@@ -1,0 +1,149 @@
+Metadata-Version: 2.4
+Name: ltspice-mcp
+Version: 0.1.0
+Summary: Asynchronous MCP server for LTspice using PyLTSpice
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: PyLTSpice>=5.5.1
+Requires-Dist: fastmcp>=3.2.4
+Provides-Extra: test
+Requires-Dist: pytest>=8.0.0; extra == "test"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "test"
+
+# ltspice_mcp
+
+Asynchronous MCP server for LTspice + PyLTSpice (`PyLTSpice>=5.5.1`) built with `fastmcp>=3.2.4`.
+
+## What It Does
+- Exposes exactly 4 MCP tools: `runtime_info`, `execute_status`, `stop_reset`, `execute`
+- Keeps tool calls non-blocking: returns immediate `in progress` response
+- Runs operations in per-session FIFO queues
+- Sends completion/error notifications to MCP clients
+- Uses only PyLTSpice APIs (no direct spicelib imports in server logic)
+
+## Project Layout
+- `src/ltspice_mcp/` server source code
+- `tests/unit/` unit tests
+- `tests/integration/` integration tests
+- `config.json` server configuration
+- `LLM.md` LLM tool-calling reference
+
+## Requirements
+- Python 3.11+
+- LTspice installed
+- Linux/macOS with Wine for Windows LTspice binary
+
+## Quick Setup
+```bash
+cd /home/brosnan/ltspice_mcp/ltspice_mcp
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -U pip
+pip install "PyLTSpice>=5.5.1" "fastmcp>=3.2.4" pytest pytest-asyncio
+pip install -e .
+```
+
+## Configuration
+`config.json` (absolute paths required):
+```json
+{
+  "mcp_server_name": "My PyLTSpice MCP Server",
+  "mcp_server_url": "http://localhost:7543",
+  "wine_path": "/usr/bin/wine",
+  "ltspice_path": "/home/brosnan/.wine/drive_c/Program Files/ADI/LTspice.exe",
+  "enable_extra_tools": true,
+  "timeout": 600
+}
+```
+
+`mcp_server_url` supports `http://`, `https://`, and `stdio://`.
+
+## Run Server
+Use stdio transport:
+```bash
+. .venv/bin/activate
+python -m ltspice_mcp --config /home/brosnan/ltspice_mcp/ltspice_mcp/config.json
+```
+
+## MCP Client Config Examples
+### OpenCode
+```json
+{
+  "mcpServers": {
+    "ltspice_mcp": {
+      "command": "/home/brosnan/ltspice_mcp/ltspice_mcp/.venv/bin/python",
+      "args": [
+        "-m",
+        "ltspice_mcp",
+        "--config",
+        "/home/brosnan/ltspice_mcp/ltspice_mcp/config.json"
+      ]
+    }
+  }
+}
+```
+
+### Claude Code
+```json
+{
+  "mcpServers": {
+    "ltspice_mcp": {
+      "command": "/home/brosnan/ltspice_mcp/ltspice_mcp/.venv/bin/python",
+      "args": [
+        "-m",
+        "ltspice_mcp",
+        "--config",
+        "/home/brosnan/ltspice_mcp/ltspice_mcp/config.json"
+      ]
+    }
+  }
+}
+```
+
+### OpenAI Codex
+```json
+{
+  "mcp_servers": {
+    "ltspice_mcp": {
+      "command": "/home/brosnan/ltspice_mcp/ltspice_mcp/.venv/bin/python",
+      "args": [
+        "-m",
+        "ltspice_mcp",
+        "--config",
+        "/home/brosnan/ltspice_mcp/ltspice_mcp/config.json"
+      ]
+    }
+  }
+}
+```
+
+## Response Contract
+Server returns these statuses:
+- `performing LTspice operation in progress`
+- `LTspice operation completed!`
+- `invalid input!`
+- `file not found!`
+- `unsupported file type!`
+- `simulator not configured!`
+- `simulation failed!`
+- `parser failed!`
+- `LTspice operation timed out!`
+- `internal error`
+
+Each payload includes `operation`. Successful responses include `output`, and optionally `output_obj_name`.
+
+## Run Tests (One By One)
+```bash
+cd /home/brosnan/ltspice_mcp/ltspice_mcp
+. .venv/bin/activate
+pytest -q tests/unit/test_responses.py
+pytest -q tests/unit/test_config.py
+pytest -q tests/unit/test_dispatcher.py
+pytest -q tests/unit/test_session.py
+pytest -q tests/integration/test_mcp_server_integration.py
+```
+
+## Notes
+- Server queues all execute/runtime/reset requests in FIFO per MCP session.
+- `execute_status` polls the latest status for the current session.
+- Completion/error notifications are emitted to client notification channel.
