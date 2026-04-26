@@ -19,10 +19,11 @@ async def _poll_execute_status(client: Client, timeout_s: float = 3.0) -> dict:
 
 
 @pytest.mark.asyncio
-async def test_mcp_server_tools_end_to_end(tmp_path: Path):
+@pytest.mark.parametrize("server_url", ["stdio://", "http://localhost:7543/", "https://localhost:7543/"])
+async def test_mcp_server_tools_end_to_end(tmp_path: Path, server_url: str):
     cfg = ServerConfig(
         mcp_server_name="My PyLTSpice MCP Server",
-        mcp_server_url="stdio://",
+        mcp_server_url=server_url,
         wine_path=str((tmp_path / "wine").resolve()),
         ltspice_path=str((tmp_path / "LTspice.exe").resolve()),
         enable_extra_tools=True,
