@@ -64,15 +64,8 @@ class SessionManager:
 
     async def enqueue_runtime_info(self, session_id: str, notifier: Notifier | None = None) -> dict[str, Any]:
         session = self.get_or_create(session_id)
-
-        async def _handler() -> dict[str, Any]:
-            info = runtime_info_payload(self.config)
-            if not info.get("simulator_configured", False):
-                return simulator_not_configured("runtime_info")
-            return completed("runtime_info", output=info)
-
-        await session.queue.put(OperationRequest("runtime_info", _handler, self.config.timeout, notifier))
-        session.last_status = in_progress("runtime_info")
+        session.last_status = completed("runtime_info", output=runtime_info_payload(self.config))
+        self._notify(notifier, session.last_status)
         return session.last_status
 
     async def enqueue_stop_reset(self, session_id: str, notifier: Notifier | None = None) -> dict[str, Any]:

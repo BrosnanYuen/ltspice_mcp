@@ -4,11 +4,13 @@ Version: 0.1.0
 Summary: Asynchronous MCP server for LTspice using PyLTSpice
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
+License-File: LICENSE
 Requires-Dist: PyLTSpice>=5.5.1
 Requires-Dist: fastmcp>=3.2.4
 Provides-Extra: test
 Requires-Dist: pytest>=8.0.0; extra == "test"
 Requires-Dist: pytest-asyncio>=0.23.0; extra == "test"
+Dynamic: license-file
 
 # ltspice_mcp
 
@@ -16,15 +18,16 @@ Asynchronous MCP server for LTspice + PyLTSpice (`PyLTSpice>=5.5.1`) built with 
 
 ## What It Does
 - Exposes exactly 4 MCP tools: `runtime_info`, `execute_status`, `stop_reset`, `execute`
-- Keeps tool calls non-blocking: returns immediate `in progress` response
+- Keeps tool calls non-blocking and immediate (`in progress` response)
 - Runs operations in per-session FIFO queues
 - Sends completion/error notifications to MCP clients
-- Uses only PyLTSpice APIs (no direct spicelib imports in server logic)
+- Uses only PyLTSpice APIs in server logic (no direct `spicelib` usage)
 
 ## Project Layout
 - `src/ltspice_mcp/` server source code
 - `tests/unit/` unit tests
 - `tests/integration/` integration tests
+- `testfiles/` copied example assets (`.asc/.log/.raw/.asy/.txt/.net`)
 - `config.json` server configuration
 - `LLM.md` LLM tool-calling reference
 
@@ -59,7 +62,7 @@ pip install -e .
 `mcp_server_url` supports `http://`, `https://`, and `stdio://`.
 
 ## Run Server
-Use stdio transport:
+Stdio transport:
 ```bash
 . .venv/bin/activate
 python -m ltspice_mcp --config /home/brosnan/ltspice_mcp/ltspice_mcp/config.json
@@ -118,7 +121,7 @@ python -m ltspice_mcp --config /home/brosnan/ltspice_mcp/ltspice_mcp/config.json
 ```
 
 ## Response Contract
-Server returns these statuses:
+Server statuses:
 - `performing LTspice operation in progress`
 - `LTspice operation completed!`
 - `invalid input!`
@@ -132,6 +135,12 @@ Server returns these statuses:
 
 Each payload includes `operation`. Successful responses include `output`, and optionally `output_obj_name`.
 
+## Integration Coverage
+Integration tests now include:
+- Core MCP flow test (`runtime_info`, `execute`, `execute_status`, `stop_reset`)
+- Mapping coverage for all `PyLTSpice/examples/*.py` files
+- Mapping coverage for all explicit examples referenced in `PyLTSpice/README.md`
+
 ## Run Tests (One By One)
 ```bash
 cd /home/brosnan/ltspice_mcp/ltspice_mcp
@@ -141,9 +150,11 @@ pytest -q tests/unit/test_config.py
 pytest -q tests/unit/test_dispatcher.py
 pytest -q tests/unit/test_session.py
 pytest -q tests/integration/test_mcp_server_integration.py
+pytest -q tests/integration/test_examples_via_mcp.py
+pytest -q tests/integration/test_readme_examples_via_mcp.py
 ```
 
 ## Notes
-- Server queues all execute/runtime/reset requests in FIFO per MCP session.
+- Server queues `runtime_info`/`execute`/`stop_reset` in FIFO per MCP session.
 - `execute_status` polls the latest status for the current session.
-- Completion/error notifications are emitted to client notification channel.
+- Completion/error notifications are emitted through MCP notification channel.

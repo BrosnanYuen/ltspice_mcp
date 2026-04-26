@@ -33,14 +33,28 @@ class ServerConfig(BaseModel):
         value = value.strip()
         if not value:
             return value
+        value = _dedupe_repeated_executable_name(value)
         return str(Path(value).expanduser().resolve())
+
+
+def _dedupe_repeated_executable_name(path_value: str) -> str:
+    path = Path(path_value)
+    name = path.name
+    half = len(name) // 2
+    if (
+        len(name) % 2 == 0
+        and name[:half].lower() == name[half:].lower()
+        and name[:half].lower().endswith(".exe")
+    ):
+        return str(path.with_name(name[:half]))
+    return path_value
 
 
 DEFAULT_CONFIG = {
     "mcp_server_name": "My PyLTSpice MCP Server",
     "mcp_server_url": "http://localhost:7543",
     "wine_path": "/usr/bin/wine",
-    "ltspice_path": "/home/brosnan/.wine/drive_c/Program Files/ADI/LTspice/LTspice.exeLTspice.exe",
+    "ltspice_path": "/home/brosnan/.wine/drive_c/Program Files/ADI/LTspice/LTspice.exe",
     "enable_extra_tools": True,
     "timeout": 600,
 }
