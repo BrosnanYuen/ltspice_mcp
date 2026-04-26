@@ -38,6 +38,8 @@ def create_mcp_server(config: ServerConfig, project_root: Path) -> FastMCP:
 
     @mcp.tool(name="execute", description="Execute one PyLTSpice API request asynchronously.")
     async def execute(api_name: str | None = None, inputs: dict | None = None, ctx: Context | None = None) -> dict:
+        api_name = api_name.replace("\"","")
+        api_name = api_name.replace("\'","")
         if ctx is None:
             return invalid_input("execute")
         session_id = _session_id_from_ctx(ctx)
