@@ -40,3 +40,15 @@ def test_invalid_scheme_rejected(tmp_path: Path):
             enable_extra_tools=True,
             timeout=10,
         )
+
+
+def test_ltspice_path_dedupes_repeated_exe_suffix():
+    cfg = ServerConfig(
+        mcp_server_name="x",
+        mcp_server_url="stdio://",
+        wine_path="/usr/bin/wine",
+        ltspice_path="/tmp/LTspice.exeLTspice.exe",
+        enable_extra_tools=True,
+        timeout=10,
+    )
+    assert cfg.ltspice_path.endswith("/tmp/LTspice.exe")

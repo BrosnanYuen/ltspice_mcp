@@ -213,8 +213,10 @@ async def test_pyltspice_example_mapped_to_mcp_calls(example_name: str, tmp_path
 
     async with Client(server) as client:
         runtime_started = (await client.call_tool("runtime_info")).data
-        assert runtime_started["status"] == "performing LTspice operation in progress"
-        _ = await _poll_status(client)
+        assert runtime_started["status"] == "LTspice operation completed!"
+        assert runtime_started["operation"] == "runtime_info"
+        assert "os" in runtime_started["output"]
+        assert "ltspice_running" in runtime_started["output"]
 
         await SCENARIOS[example_name](client, tmp_path)
 

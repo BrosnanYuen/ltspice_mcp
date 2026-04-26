@@ -61,3 +61,13 @@ async def test_stop_reset_clears_registry(config: ServerConfig, tmp_path: Path):
     assert final["status"] == "LTspice operation completed!"
     assert final["operation"] == "stop_reset"
     assert session.dispatcher.registry == {}
+
+
+@pytest.mark.asyncio
+async def test_runtime_info_returns_immediately(config: ServerConfig, tmp_path: Path):
+    manager = SessionManager(config=config, project_root=tmp_path)
+    status = await manager.enqueue_runtime_info("session-1")
+    assert status["status"] == "LTspice operation completed!"
+    assert status["operation"] == "runtime_info"
+    assert "os" in status["output"]
+    assert "ltspice_running" in status["output"]

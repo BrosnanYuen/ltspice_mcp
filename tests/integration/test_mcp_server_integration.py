@@ -37,11 +37,11 @@ async def test_mcp_server_tools_end_to_end(tmp_path: Path, server_url: str):
         assert {"runtime_info", "execute_status", "stop_reset", "execute"}.issubset(tool_names)
 
         runtime_started = (await client.call_tool("runtime_info")).data
-        assert runtime_started["status"] == "performing LTspice operation in progress"
-
-        runtime_final = await _poll_execute_status(client)
-        assert runtime_final["operation"] in {"runtime_info", "execute"}
-        assert runtime_final["status"] in {"simulator not configured!", "LTspice operation completed!"}
+        assert runtime_started["status"] == "LTspice operation completed!"
+        assert runtime_started["operation"] == "runtime_info"
+        assert "output" in runtime_started
+        assert "os" in runtime_started["output"]
+        assert "ltspice_running" in runtime_started["output"]
 
         execute_started = (await client.call_tool("execute", {"api_name": "all_loggers", "inputs": {}})).data
         assert execute_started["status"] == "performing LTspice operation in progress"

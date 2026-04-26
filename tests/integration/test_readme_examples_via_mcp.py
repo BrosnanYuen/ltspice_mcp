@@ -141,8 +141,10 @@ async def test_readme_examples_via_mcp(example_name: str, tmp_path: Path):
 
     async with Client(server) as client:
         runtime_started = (await client.call_tool("runtime_info")).data
-        assert runtime_started["status"] == "performing LTspice operation in progress"
-        _ = await _poll_status(client)
+        assert runtime_started["status"] == "LTspice operation completed!"
+        assert runtime_started["operation"] == "runtime_info"
+        assert "os" in runtime_started["output"]
+        assert "ltspice_running" in runtime_started["output"]
 
         await README_SCENARIOS[example_name](client, tmp_path)
 

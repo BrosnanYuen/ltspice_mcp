@@ -3,16 +3,17 @@
 ## Core MCP Tools
 | Tool | Input | Purpose |
 |---|---|---|
-| `runtime_info` | `{}` | Queue runtime diagnostics for LTspice/Wine/OS and simulator readiness. |
+| `runtime_info` | `{}` | Return runtime diagnostics for LTspice/Wine/OS and simulator readiness immediately. |
 | `execute_status` | `{}` | Poll latest status for the session queue. |
 | `stop_reset` | `{}` | Cancel/reset queue and object registry for current session. |
 | `execute` | `{"api_name": "...", "inputs": {...}}` | Queue one PyLTSpice API operation. |
 
 ## Async Behavior
-1. Call `runtime_info`, `stop_reset`, or `execute`.
-2. Immediate response: `performing LTspice operation in progress`.
-3. Poll with `execute_status` until status is not in-progress.
-4. Read `output` and optional `output_obj_name` on completion.
+1. Call `runtime_info` for immediate diagnostics (no queue, no polling).
+2. Call `stop_reset` or `execute`.
+3. Immediate response for queued operations: `performing LTspice operation in progress`.
+4. Poll with `execute_status` until status is not in-progress.
+5. Read `output` and optional `output_obj_name` on completion.
 
 ## Standard Response Shapes
 In progress:
@@ -22,6 +23,10 @@ In progress:
 Completed:
 ```json
 {"status":"LTspice operation completed!","operation":"execute","output_obj_name":"obj1","output":{}}
+```
+Immediate `runtime_info` response:
+```json
+{"status":"LTspice operation completed!","operation":"runtime_info","output":{"os":{},"ltspice_running":false}}
 ```
 Error statuses:
 - `invalid input!`

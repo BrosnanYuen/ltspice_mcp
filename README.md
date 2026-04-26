@@ -4,7 +4,8 @@ Asynchronous MCP server for LTspice + PyLTSpice (`PyLTSpice>=5.5.1`) built with 
 
 ## What It Does
 - Exposes exactly 4 MCP tools: `runtime_info`, `execute_status`, `stop_reset`, `execute`
-- Keeps tool calls non-blocking and immediate (`in progress` response)
+- Returns `runtime_info` immediately with OS/runtime status
+- Keeps `execute` and `stop_reset` non-blocking (`in progress` response)
 - Runs operations in per-session FIFO queues
 - Sends completion/error notifications to MCP clients
 - Uses only PyLTSpice APIs in server logic (no direct `spicelib` usage)
@@ -39,7 +40,7 @@ pip install -e .
   "mcp_server_name": "My PyLTSpice MCP Server",
   "mcp_server_url": "http://localhost:7543",
   "wine_path": "/usr/bin/wine",
-  "ltspice_path": "/home/brosnan/.wine/drive_c/Program Files/ADI/LTspice/LTspice.exeLTspice.exe",
+  "ltspice_path": "/home/brosnan/.wine/drive_c/Program Files/ADI/LTspice/LTspice.exe",
   "enable_extra_tools": true,
   "timeout": 600
 }
@@ -141,6 +142,7 @@ pytest -q tests/integration/test_readme_examples_via_mcp.py
 ```
 
 ## Notes
-- Server queues `runtime_info`/`execute`/`stop_reset` in FIFO per MCP session.
-- `execute_status` polls the latest status for the current session.
+- `runtime_info` is immediate and does not require `execute_status` polling.
+- Server queues `execute`/`stop_reset` in FIFO per MCP session.
+- `execute_status` polls the latest status for queued operations.
 - Completion/error notifications are emitted through MCP notification channel.
