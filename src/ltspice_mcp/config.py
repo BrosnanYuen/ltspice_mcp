@@ -40,7 +40,7 @@ DEFAULT_CONFIG = {
     "mcp_server_name": "My PyLTSpice MCP Server",
     "mcp_server_url": "http://localhost:7543",
     "wine_path": "/usr/bin/wine",
-    "ltspice_path": "/home/brosnan/.wine/drive_c/Program Files/ADI/LTspice.exe",
+    "ltspice_path": "/home/brosnan/.wine/drive_c/Program Files/ADI/LTspice/LTspice.exeLTspice.exe",
     "enable_extra_tools": True,
     "timeout": 600,
 }
