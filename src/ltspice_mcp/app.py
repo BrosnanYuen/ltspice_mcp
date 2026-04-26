@@ -62,4 +62,5 @@ def run_server(mcp: FastMCP, config: ServerConfig) -> None:
     host = parsed.hostname or "127.0.0.1"
     port = parsed.port or 7543
     # FastMCP streamable-http transport serves both HTTP and HTTPS deployments when proxied.
-    mcp.run(transport="streamable-http", host=host, port=port)
+    # Force MCP endpoint at "/" (not default "/mcp") for both http:// and https:// configs.
+    mcp.run(transport="streamable-http", host=host, port=port, path="/")
