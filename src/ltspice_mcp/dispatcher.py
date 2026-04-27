@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import logging
 from pathlib import Path
 from typing import Any
@@ -223,6 +224,75 @@ class ApiDispatcher:
         if api_name in {"LTSpiceLogReader", "opLogReader"} and ext != ".log":
             raise UnsupportedFileTypeError("log reader supports .log")
 
+    def _traces_to_csv(self, object_name: Any, trace_refs: Any, output_files: Any) -> dict[str, Any]:
+        raw_obj = object_name
+        if raw_obj is None:
+            raise ValueError("traces_to_csv requires object_name")
+
+        if not isinstance(trace_refs, list) or not trace_refs:
+            raise ValueError("trace_refs must be a non-empty array of trace names")
+        if not all(isinstance(trace_ref, str) and trace_ref.strip() for trace_ref in trace_refs):
+            raise ValueError("trace_refs must contain only non-empty strings")
+
+        steps = raw_obj.get_steps()
+        wave_count = len(steps) if steps else 1
+        if wave_count <= 0:
+            wave_count = 1
+
+        csv_paths = self._resolve_csv_paths(output_files, wave_count)
+        written_files: list[str] = []
+
+        for wave in range(wave_count):
+            csv_path = csv_paths[wave]
+            csv_path.parent.mkdir(parents=True, exist_ok=True)
+            xaxis_values = self._get_xaxis_values(raw_obj, wave)
+            trace_waves = [raw_obj.get_trace(trace_ref).get_wave(wave) for trace_ref in trace_refs]
+
+            row_count = min([len(xaxis_values), *[len(trace_wave) for trace_wave in trace_waves]])
+            with csv_path.open("w", newline="", encoding="utf-8") as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(["xaxis", *trace_refs])
+                for idx in range(row_count):
+                    writer.writerow([xaxis_values[idx], *[trace_wave[idx] for trace_wave in trace_waves]])
+            written_files.append(str(csv_path.resolve()))
+
+        return {
+            "written_files": written_files,
+            "wave_count": wave_count,
+            "trace_refs": trace_refs,
+        }
+
+    def _resolve_csv_paths(self, output_files: Any, wave_count: int) -> list[Path]:
+        if isinstance(output_files, str):
+            base = Path(output_files)
+            suffix = base.suffix.lower()
+            if suffix == ".csv":
+                if wave_count != 1:
+                    raise ValueError("output_files as a .csv file requires exactly one wave")
+                return [base]
+            return [Path(f"{output_files}{wave}.csv") for wave in range(wave_count)]
+
+        if isinstance(output_files, list):
+            if len(output_files) != wave_count:
+                raise ValueError("output_files list length must match number of waves")
+            csv_paths = [Path(path) for path in output_files]
+            if not all(path.suffix.lower() == ".csv" for path in csv_paths):
+                raise ValueError("all output_files entries must end with .csv")
+            return csv_paths
+
+        raise ValueError("output_files must be a string prefix/path or an array of .csv file paths")
+
+    def _get_xaxis_values(self, raw_obj: Any, wave: int) -> Any:
+        try:
+            return raw_obj.get_axis(wave)
+        except Exception:
+            trace_names = raw_obj.get_trace_names()
+            if "time" in trace_names:
+                return raw_obj.get_trace("time").get_wave(wave)
+            if not trace_names:
+                raise ValueError("raw object has no traces to derive xaxis values")
+            return raw_obj.get_trace(trace_names[0]).get_wave(wave)
+
     def _callables(self) -> dict[str, Any]:
         return {
             "all_loggers": lambda: all_loggers(),
@@ -256,6 +326,7 @@ class ApiDispatcher:
             "sweep_iterators": sweep_iterators,
             "EncodingDetectError": EncodingDetectError,
             "detect_encoding": detect_encoding,
+            "traces_to_csv": self._traces_to_csv,
         }
 
     def _serialize(self, value: Any) -> Any:
