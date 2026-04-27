@@ -48,6 +48,7 @@ Error statuses:
 | `add_log_handler` | `handler_type:"null"|"stream"` | Add handler to known loggers. |
 | `RawRead` | `raw_filename`, `traces_to_read?`, `dialect?`, `verbose?` | Read LTspice RAW file. |
 | `LTSpiceRawRead` | same as `RawRead` | Alias of `RawRead`. |
+| `traces_to_csv` | `object_name`, `trace_refs:[...]`, `output_files` | Export selected traces from `RawRead` object into per-wave CSV files. |
 | `RawWrite` | `**kwargs` | Build/write LTspice RAW content. |
 | `Trace` | `name`, `data`, `whattype?` | Create RAW trace. |
 | `SpiceCircuit` | `netlist source/path` | Generic spice circuit API. |
@@ -82,6 +83,33 @@ Examples:
 - `{"api_name":"save_netlist","inputs":{"object_name":"ed1","run_netlist_file":"/abs/path/out.net"}}`
 
 Dotted names are also supported (e.g. `SpiceEditor.run`).
+
+## `traces_to_csv` Details
+- `trace_refs` accepts any-length arrays and writes all listed traces as CSV columns.
+- CSV header is `xaxis` plus each item in `trace_refs`.
+- `output_files` can be:
+  - A string prefix/path such as `./sim_wave_` (creates `./sim_wave_0.csv`, `./sim_wave_1.csv`, ...)
+  - An explicit array of `.csv` file paths with one entry per wave
+
+Example:
+```json
+{"tool":"execute","arguments":{"api_name":"traces_to_csv","inputs":{"object_name":"raw","trace_refs":["V(opamp_input)","V(opamp_output)"],"output_files":"./sim_wave_"}}}
+```
+
+## `run_ltspice_to_csv.py` Equivalent Calls
+Use this sequence to mirror `netlistexample/run_ltspice_to_csv.py`:
+1. `SpiceEditor` on `/home/brosnan/ltspice_mcp/ltspice_mcp/testfiles/opampdouble.net`
+2. `SimRunner` with an output folder
+3. `SimRunner.run` with `new_object_name:"run_task"`
+4. `wait_results` on `run_task` to get `raw_file`
+5. `RawRead` using that raw file
+6. `traces_to_csv` with
+   - `trace_refs:["V(opamp_input)","V(opamp_output)"]`
+   - `output_files:"./sim_wave_"`
+
+Codex/OpenCode ready recipes:
+- `/home/brosnan/ltspice_mcp/ltspice_mcp/examples/codex/run_ltspice_to_csv.md`
+- `/home/brosnan/ltspice_mcp/ltspice_mcp/examples/opencode/run_ltspice_to_csv.md`
 
 ## Example Workflow
 ```json

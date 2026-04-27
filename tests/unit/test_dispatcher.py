@@ -15,6 +15,33 @@ class DummyObject:
         return {"ref": ref, "distribution": distribution, "value": self.value}
 
 
+class DummyTrace:
+    def __init__(self, waves):
+        self._waves = waves
+
+    def get_wave(self, wave: int):
+        return self._waves[wave]
+
+
+class DummyRaw:
+    def __init__(self):
+        self._steps = [0, 1]
+        self._axis = [[0.0, 1.0, 2.0], [0.0, 1.0]]
+        self._traces = {
+            "V(opamp_input)": DummyTrace([[10.0, 11.0, 12.0], [20.0, 21.0]]),
+            "V(opamp_output)": DummyTrace([[100.0, 101.0, 102.0], [200.0, 201.0]]),
+        }
+
+    def get_steps(self):
+        return self._steps
+
+    def get_axis(self, wave: int):
+        return self._axis[wave]
+
+    def get_trace(self, trace_ref: str):
+        return self._traces[trace_ref]
+
+
 def _config(tmp_path: Path) -> ServerConfig:
     return ServerConfig(
         mcp_server_name="x",
@@ -62,3 +89,30 @@ def test_execute_unknown_api_raises(tmp_path: Path):
     d = ApiDispatcher(config=_config(tmp_path), project_root=tmp_path)
     with pytest.raises(ValueError):
         d.execute_api("does_not_exist", {})
+
+
+def test_traces_to_csv_writes_all_waves(tmp_path: Path):
+    d = ApiDispatcher(config=_config(tmp_path), project_root=tmp_path)
+    d.registry["raw"] = DummyRaw()
+
+    out_name, out = d.execute_api(
+        "traces_to_csv",
+        {
+            "object_name": "raw",
+            "trace_refs": ["V(opamp_input)", "V(opamp_output)"],
+            "output_files": "./sim_wave_",
+        },
+    )
+    assert out_name is None
+    result = out["result"]
+    assert result["wave_count"] == 2
+    assert len(result["written_files"]) == 2
+
+    csv0 = Path(result["written_files"][0]).read_text(encoding="utf-8")
+    csv1 = Path(result["written_files"][1]).read_text(encoding="utf-8")
+
+    assert "xaxis,V(opamp_input),V(opamp_output)" in csv0
+    assert "0.0,10.0,100.0" in csv0
+    assert "2.0,12.0,102.0" in csv0
+    assert "xaxis,V(opamp_input),V(opamp_output)" in csv1
+    assert "1.0,21.0,201.0" in csv1

@@ -7,6 +7,9 @@ from fastmcp import Client
 from ltspice_mcp.app import create_mcp_server
 from ltspice_mcp.config import ServerConfig
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+TESTFILES = PROJECT_ROOT / "testfiles"
+
 
 async def _poll_execute_status(client: Client, timeout_s: float = 3.0) -> dict:
     deadline = asyncio.get_event_loop().time() + timeout_s
@@ -50,6 +53,46 @@ async def test_mcp_server_tools_end_to_end(tmp_path: Path, server_url: str):
         assert execute_final["status"] == "LTspice operation completed!"
         assert execute_final["operation"] == "execute"
         assert "result" in execute_final["output"]
+
+        rawread_started = (
+            await client.call_tool(
+                "execute",
+                {
+                    "api_name": "RawRead",
+                    "inputs": {
+                        "new_object_name": "raw_tran",
+                        "raw_filename": str((TESTFILES / "TRAN - STEP.raw").resolve()),
+                    },
+                },
+            )
+        ).data
+        assert rawread_started["status"] == "performing LTspice operation in progress"
+        rawread_final = await _poll_execute_status(client)
+        assert rawread_final["status"] == "LTspice operation completed!"
+
+        traces_csv_started = (
+            await client.call_tool(
+                "execute",
+                {
+                    "api_name": "traces_to_csv",
+                    "inputs": {
+                        "object_name": "raw_tran",
+                        "trace_refs": ["V(in)", "V(out)"],
+                        "output_files": str((tmp_path / "sim_wave_").resolve()),
+                    },
+                },
+            )
+        ).data
+        assert traces_csv_started["status"] == "performing LTspice operation in progress"
+        traces_csv_final = await _poll_execute_status(client)
+        assert traces_csv_final["status"] == "LTspice operation completed!"
+        result = traces_csv_final["output"]["result"]
+        assert result["wave_count"] >= 1
+        assert len(result["written_files"]) == result["wave_count"]
+        for csv_path in result["written_files"]:
+            path = Path(csv_path)
+            assert path.exists()
+            assert path.suffix.lower() == ".csv"
 
         missing_file = (
             await client.call_tool(
