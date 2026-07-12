@@ -4,5 +4,15 @@
   "wine_path": "/usr/bin/wine",
   "ltspice_path": "/home/brosnan/.wine/drive_c/Program Files/ADI/LTspice/LTspice.exe",
   "enable_extra_tools": true,
-  "timeout": 600
+  "timeout": 600,
+  "convert_settings": {
+    "ltspice_windows_path": "C:\\users\\brosnan\\AppData\\Local\\LTspice\\",
+    "ltspice_wine_path": "~/.wine/drive_c/users/brosnan/AppData/Local/LTspice/",
+    "custom_search_paths": ["./valid_asy/"],
+    "minimum_dist": 32,
+    "wire_pin_out_dist": 16,
+    "grid_size": 16,
+    "autoplace_iter": 12,
+    "ltspice_version": 4.1
+  }
 }

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import logging
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -32,7 +33,8 @@ from PyLTSpice.sim.tookit.worst_case import WorstCaseAnalysis
 from PyLTSpice.utils.detect_encoding import EncodingDetectError, detect_encoding
 from PyLTSpice.utils.sweep_iterators import sweep, sweep_iterators, sweep_log, sweep_log_n, sweep_n
 
-from .config import ServerConfig
+from .config import ConvertSettings, ServerConfig
+from .conversion import CONVERSION_APIS, CONVERSION_CALLABLES
 
 
 class UnsupportedFileTypeError(ValueError):
@@ -81,6 +83,8 @@ class ApiDispatcher:
             raise ValueError(f"unknown api_name: {api_name}")
 
         kwargs = self._normalize_kwargs(api_name, dict(inputs))
+        if api_name in CONVERSION_APIS:
+            kwargs = self._apply_convert_settings(kwargs)
 
         if api_name in READ_APIS:
             self._validate_read_inputs(api_name, kwargs)
@@ -139,12 +143,88 @@ class ApiDispatcher:
         for key, value in kwargs.items():
             if key == "new_object_name":
                 continue
+            if key == "convert_settings":
+                normalized[key] = value
+                continue
             normalized[key] = self._normalize_value(key, value)
 
         # Backward-compatible alias.
         if api_name == "LTSpiceRawRead":
             api_name = "RawRead"
         return normalized
+
+    def _apply_convert_settings(self, kwargs: dict[str, Any]) -> dict[str, Any]:
+        configured_settings = self.config.convert_settings.model_dump()
+        requested_settings = kwargs.get("convert_settings")
+
+        if requested_settings is None:
+            effective_settings: dict[str, Any] = configured_settings
+        elif isinstance(requested_settings, ConvertSettings):
+            effective_settings = {
+                **configured_settings,
+                **requested_settings.model_dump(),
+            }
+        elif isinstance(requested_settings, Mapping):
+            effective_settings = {
+                **configured_settings,
+                **dict(requested_settings),
+            }
+        else:
+            raise ValueError("convert_settings must be a JSON object")
+
+        return {
+            **kwargs,
+            "convert_settings": self._normalize_convert_settings(effective_settings),
+        }
+
+    def _normalize_convert_settings(self, settings: Mapping[str, Any]) -> dict[str, Any]:
+        normalized = dict(settings)
+
+        for key in ("ltspice_wine_path",):
+            if key in normalized:
+                normalized[key] = self._normalize_convert_path(normalized[key], preserve_windows=False)
+
+        if "custom_search_paths" in normalized:
+            search_paths = normalized["custom_search_paths"]
+            if isinstance(search_paths, str):
+                search_paths = [search_paths]
+            if isinstance(search_paths, (list, tuple)):
+                normalized["custom_search_paths"] = [
+                    self._normalize_convert_path(path, preserve_windows=False)
+                    for path in search_paths
+                ]
+
+        # Keep Windows paths in Windows syntax. Path.resolve() on a Linux host
+        # would incorrectly turn e.g. C:\\users\\... into a project-local path.
+        if "ltspice_windows_path" in normalized:
+            normalized["ltspice_windows_path"] = self._normalize_convert_path(
+                normalized["ltspice_windows_path"],
+                preserve_windows=True,
+            )
+
+        return normalized
+
+    def _normalize_convert_path(self, value: Any, *, preserve_windows: bool) -> Any:
+        if not isinstance(value, str):
+            return value
+        value = value.strip()
+        if not value:
+            return value
+        if preserve_windows and self._looks_like_windows_path(value):
+            return value
+
+        path = Path(value).expanduser()
+        if not path.is_absolute():
+            path = self.project_root / path
+        return str(path.resolve())
+
+    @staticmethod
+    def _looks_like_windows_path(value: str) -> bool:
+        return (
+            len(value) >= 3
+            and value[1] == ":"
+            and value[2] in {"\\", "/"}
+        ) or value.startswith("\\\\")
 
     def _normalize_value(self, key: str, value: Any) -> Any:
         if isinstance(value, str):
@@ -294,7 +374,7 @@ class ApiDispatcher:
             return raw_obj.get_trace(trace_names[0]).get_wave(wave)
 
     def _callables(self) -> dict[str, Any]:
-        return {
+        callables = {
             "all_loggers": lambda: all_loggers(),
             "set_log_level": lambda level: set_log_level(level),
             "add_log_handler": lambda handler: add_log_handler(handler),
@@ -328,6 +408,8 @@ class ApiDispatcher:
             "detect_encoding": detect_encoding,
             "traces_to_csv": self._traces_to_csv,
         }
+        callables.update(CONVERSION_CALLABLES)
+        return callables
 
     def _serialize(self, value: Any) -> Any:
         if value is None:

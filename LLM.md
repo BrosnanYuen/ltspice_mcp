@@ -67,6 +67,8 @@ Error statuses:
 | `SimStepper` | `editor`, `runner` | Parameter/model sweep controller. |
 | `Montecarlo` | `circuit_file`, `runner` | Monte Carlo analysis toolkit. |
 | `WorstCaseAnalysis` | `circuit_file`, `runner` | Worst-case analysis toolkit. |
+| `is_valid_ltspice_netlist_file` | `filepath` | Validate an LTspice netlist file. |
+| `ltspice_netlist_to_asc` | `netlist_filepath`, `asc_filepath_out` | Convert an LTspice netlist to an ASC schematic using configured `convert_settings`. |
 | `sweep` | `stop` OR `start,stop,step` | Linear sweep iterator. |
 | `sweep_n` | `start,stop,n` | Linear sweep fixed points. |
 | `sweep_log` | `start,stop,step_factor/base` | Logarithmic sweep iterator. |
@@ -76,6 +78,11 @@ Error statuses:
 | `detect_encoding` | `file/path`, `encodings?`, `**kwargs` | Detect text encoding. |
 
 MCP argument names follow the PyLTSpice constructor signatures exactly. Use `asc_filename` for `AscEditor` and `editor` for `SimStepper`; legacy aliases are not supported.
+
+For `ltspice_netlist_to_asc`, `convert_settings` is optional in `inputs`. When
+it is omitted, the server uses the optional `convert_settings` section from
+`config.json`, including defaults for every setting. Values supplied in a
+request override the configured values for that request.
 
 ## Method Calls via `execute`
 Server supports direct object method invocation when `inputs.object_name` is present.

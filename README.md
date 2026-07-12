@@ -43,9 +43,23 @@ pip install -e .
   "wine_path": "/usr/bin/wine",
   "ltspice_path": "/home/brosnan/.wine/drive_c/Program Files/ADI/LTspice/LTspice.exe",
   "enable_extra_tools": true,
-  "timeout": 600
+  "timeout": 600,
+  "convert_settings": {
+    "ltspice_windows_path": "C:\\users\\brosnan\\AppData\\Local\\LTspice\\",
+    "ltspice_wine_path": "~/.wine/drive_c/users/brosnan/AppData/Local/LTspice/",
+    "custom_search_paths": ["./valid_asy/"],
+    "minimum_dist": 32,
+    "wire_pin_out_dist": 16,
+    "grid_size": 16,
+    "autoplace_iter": 12,
+    "ltspice_version": 4.1
+  }
 }
 ```
+
+`convert_settings` is optional. Each setting is optional and receives a default
+when omitted. Relative `custom_search_paths` are resolved from the server
+project root; Windows paths remain in Windows syntax for Wine-based conversion.
 
 `mcp_server_url` supports `http://`, `https://`, and `stdio://`.
 
@@ -137,6 +151,15 @@ Example MCP call:
 ```json
 {"tool":"execute","arguments":{"api_name":"traces_to_csv","inputs":{"object_name":"raw","trace_refs":["V(opamp_input)","V(opamp_output)"],"output_files":"./sim_wave_"}}}
 ```
+
+## LTspice schematic conversion via `execute`
+
+The following `electronics-design` APIs are available through `execute`:
+`is_valid_ltspice_netlist_file` and `ltspice_netlist_to_asc`.
+
+`ltspice_netlist_to_asc` receives the configured `convert_settings` automatically.
+A request may include an `inputs.convert_settings` object to override individual
+values for that call. `is_valid_ltspice_netlist_file` only requires its filepath.
 
 ## `run_ltspice_to_csv.py` Equivalent MCP Flow
 Equivalent artifacts are included for the op-amp example workflow:

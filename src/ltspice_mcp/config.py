@@ -7,6 +7,45 @@ from urllib.parse import urlparse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
+DEFAULT_CONVERT_SETTINGS = {
+    "ltspice_windows_path": "C:\\users\\brosnan\\AppData\\Local\\LTspice\\",
+    "ltspice_wine_path": "~/.wine/drive_c/users/brosnan/AppData/Local/LTspice/",
+    "custom_search_paths": ["./valid_asy/"],
+    "minimum_dist": 32,
+    "wire_pin_out_dist": 16,
+    "grid_size": 16,
+    "autoplace_iter": 12,
+    "ltspice_version": 4.1,
+}
+
+
+class ConvertSettings(BaseModel):
+    """Optional settings used by the electronics-design LTspice converters."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    ltspice_windows_path: str = Field(default=DEFAULT_CONVERT_SETTINGS["ltspice_windows_path"])
+    ltspice_wine_path: str = Field(default=DEFAULT_CONVERT_SETTINGS["ltspice_wine_path"])
+    custom_search_paths: list[str] = Field(
+        default_factory=lambda: list(DEFAULT_CONVERT_SETTINGS["custom_search_paths"])
+    )
+    minimum_dist: int = Field(default=32, ge=0)
+    wire_pin_out_dist: int = Field(default=16, ge=0)
+    grid_size: int = Field(default=16, gt=0)
+    autoplace_iter: int = Field(default=12, gt=0)
+    ltspice_version: float = Field(default=4.1, gt=0)
+
+    @field_validator("ltspice_windows_path", "ltspice_wine_path")
+    @classmethod
+    def normalize_convert_path_text(cls, value: str) -> str:
+        return value.strip()
+
+    @field_validator("custom_search_paths")
+    @classmethod
+    def validate_custom_search_paths(cls, value: list[str]) -> list[str]:
+        return [path.strip() for path in value]
+
+
 class ServerConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -16,6 +55,7 @@ class ServerConfig(BaseModel):
     ltspice_path: str = Field(default="")
     enable_extra_tools: bool = Field(default=True)
     timeout: int = Field(default=600, ge=1)
+    convert_settings: ConvertSettings = Field(default_factory=ConvertSettings)
 
     @field_validator("mcp_server_url")
     @classmethod
@@ -57,6 +97,7 @@ DEFAULT_CONFIG = {
     "ltspice_path": "/home/brosnan/.wine/drive_c/Program Files/ADI/LTspice/LTspice.exe",
     "enable_extra_tools": True,
     "timeout": 600,
+    "convert_settings": DEFAULT_CONVERT_SETTINGS,
 }
 
 
