@@ -1,0 +1,26 @@
+{
+  "examples": [
+    "ltsteps_example.py",
+    "raw_plotting.py",
+    "raw_read_example.py",
+    "raw_write_example.py",
+    "run_montecarlo.py",
+    "run_worst_case.py",
+    "sim_runner_asc_example.py",
+    "sim_runner_callback_example.py",
+    "sim_runner_callback_process_example.py",
+    "sim_runner_example.py",
+    "sim_stepper_example.py",
+    "spice_editor_example.py",
+    "sub_circuit_asc_edits.py"
+  ],
+  "readme_examples": [
+    "ltsteps_example.py",
+    "raw_read_example.py",
+    "raw_write_example.py",
+    "run_montecarlo.py",
+    "run_worst_case.py",
+    "sim_client_example.py",
+    "sim_runner_example.py"
+  ]
+}

@@ -132,5 +132,5 @@ Codex/OpenCode ready recipes:
 
 ## Integration-Test Mapping
 Integration suites exercise these flows through MCP client calls:
-- `tests/integration/test_examples_via_mcp.py` for all files in `PyLTSpice/examples/`
-- `tests/integration/test_readme_examples_via_mcp.py` for all `-- in examples/*.py` references in `PyLTSpice/README.md`
+- `tests/integration/test_examples_via_mcp.py` for the checked-in example-name manifest
+- `tests/integration/test_readme_examples_via_mcp.py` for the checked-in README example-name list

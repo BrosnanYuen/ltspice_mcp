@@ -148,8 +148,9 @@ Equivalent artifacts are included for the op-amp example workflow:
 ## Integration Coverage
 Integration tests now include:
 - Core MCP flow test (`runtime_info`, `execute`, `execute_status`, `stop_reset`)
-- Mapping coverage for all `PyLTSpice/examples/*.py` files
-- Mapping coverage for all explicit examples referenced in `PyLTSpice/README.md`
+- Mapping coverage for the checked-in PyLTSpice example-name manifest
+  (`tests/fixtures/pyltspice_example_manifest.json`)
+- Mapping coverage for the checked-in README example-name list in that manifest
 - End-to-end `run_ltspice_to_csv.py` style MCP workflow for `opampdouble.net`
 
 ## Run Tests (One By One)

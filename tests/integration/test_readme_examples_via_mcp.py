@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-import re
+import json
 from pathlib import Path
 
 import pytest
@@ -11,7 +11,7 @@ from ltspice_mcp.app import create_mcp_server
 from ltspice_mcp.config import ServerConfig
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-README_PATH = Path("/home/brosnan/ltspice_mcp/PyLTSpice/README.md")
+EXAMPLE_MANIFEST = PROJECT_ROOT / "tests" / "fixtures" / "pyltspice_example_manifest.json"
 TESTFILES = PROJECT_ROOT / "testfiles"
 
 BAD_STATUSES = {
@@ -45,8 +45,8 @@ async def _execute(client: Client, api_name: str, inputs: dict, *, allow_invalid
 
 
 def _readme_example_names() -> list[str]:
-    text = README_PATH.read_text(encoding="utf-8")
-    return sorted(set(re.findall(r"-- in examples/(.+?\.py)", text)))
+    manifest = json.loads(EXAMPLE_MANIFEST.read_text(encoding="utf-8"))
+    return sorted(manifest["readme_examples"])
 
 
 async def _raw_read_example(client: Client, temp_dir: Path) -> None:

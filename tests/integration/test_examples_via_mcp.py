@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from pathlib import Path
 
 import pytest
@@ -10,7 +11,9 @@ from ltspice_mcp.app import create_mcp_server
 from ltspice_mcp.config import ServerConfig
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-EXAMPLES_ROOT = Path("/home/brosnan/ltspice_mcp/PyLTSpice/examples")
+# Keep the example-name contract in this repository instead of requiring a
+# separate PyLTSpice source checkout at test time.
+EXAMPLE_MANIFEST = PROJECT_ROOT / "tests" / "fixtures" / "pyltspice_example_manifest.json"
 TESTFILES = PROJECT_ROOT / "testfiles"
 
 BAD_STATUSES = {
@@ -195,11 +198,15 @@ SCENARIOS = {
 }
 
 
+def _manifest_example_names() -> list[str]:
+    manifest = json.loads(EXAMPLE_MANIFEST.read_text(encoding="utf-8"))
+    return sorted(manifest["examples"])
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("example_name", sorted(SCENARIOS.keys()))
 async def test_pyltspice_example_mapped_to_mcp_calls(example_name: str, tmp_path: Path):
-    discovered = sorted(p.name for p in EXAMPLES_ROOT.glob("*.py"))
-    assert sorted(SCENARIOS.keys()) == discovered
+    assert sorted(SCENARIOS.keys()) == _manifest_example_names()
 
     cfg = ServerConfig(
         mcp_server_name="My PyLTSpice MCP Server",
