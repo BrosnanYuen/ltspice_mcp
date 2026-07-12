@@ -80,7 +80,7 @@ async def _run_montecarlo_example(client: Client, temp_dir: Path) -> None:
     await _execute(
         client,
         "AscEditor",
-        {"new_object_name": "sallenkey_mc", "asc_file": str((TESTFILES / "sallenkey.asc").resolve())},
+        {"new_object_name": "sallenkey_mc", "asc_filename": str((TESTFILES / "sallenkey.asc").resolve())},
     )
     await _execute(client, "SimRunner", {"new_object_name": "runner_mc", "output_folder": str((temp_dir / "temp_mc").resolve())})
     await _execute(client, "Montecarlo", {"new_object_name": "mc", "circuit_file": "sallenkey_mc", "runner": "runner_mc"})
@@ -91,7 +91,7 @@ async def _run_worst_case_example(client: Client, temp_dir: Path) -> None:
     await _execute(
         client,
         "AscEditor",
-        {"new_object_name": "sallenkey_wc", "asc_file": str((TESTFILES / "sallenkey.asc").resolve())},
+        {"new_object_name": "sallenkey_wc", "asc_filename": str((TESTFILES / "sallenkey.asc").resolve())},
     )
     await _execute(client, "SimRunner", {"new_object_name": "runner_wc", "output_folder": str((temp_dir / "temp_wca").resolve())})
     await _execute(client, "WorstCaseAnalysis", {"new_object_name": "wca", "circuit_file": "sallenkey_wc", "runner": "runner_wc"})

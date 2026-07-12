@@ -149,7 +149,7 @@ class ApiDispatcher:
     def _normalize_value(self, key: str, value: Any) -> Any:
         if isinstance(value, str):
             # Resolve object references by name when the key implies one.
-            if key in {"circuit_file", "circuit", "runner", "editor", "simulator", "spice_tool", "object_name"}:
+            if key in {"circuit_file", "runner", "editor", "simulator", "spice_tool", "object_name"}:
                 if value in self.registry:
                     return self.registry[value]
 
@@ -192,7 +192,7 @@ class ApiDispatcher:
             "raw_filename",
             "netlist_file",
             "circuit_file",
-            "asc_file",
+            "asc_filename",
             "logfile",
             "log_filename",
             "input_file",

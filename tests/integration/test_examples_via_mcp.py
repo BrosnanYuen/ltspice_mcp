@@ -83,7 +83,7 @@ async def _scenario_run_montecarlo(client: Client, temp_dir: Path) -> None:
     await _execute(
         client,
         "AscEditor",
-        {"new_object_name": "sallenkey", "asc_file": str((TESTFILES / "sallenkey.asc").resolve())},
+        {"new_object_name": "sallenkey", "asc_filename": str((TESTFILES / "sallenkey.asc").resolve())},
     )
     await _execute(client, "SimRunner", {"new_object_name": "runner_mc", "output_folder": str((temp_dir / "temp_mc").resolve())})
     await _execute(client, "Montecarlo", {"new_object_name": "mc", "circuit_file": "sallenkey", "runner": "runner_mc"})
@@ -94,7 +94,7 @@ async def _scenario_run_worst_case(client: Client, temp_dir: Path) -> None:
     await _execute(
         client,
         "AscEditor",
-        {"new_object_name": "sallenkey_wc", "asc_file": str((TESTFILES / "sallenkey.asc").resolve())},
+        {"new_object_name": "sallenkey_wc", "asc_filename": str((TESTFILES / "sallenkey.asc").resolve())},
     )
     await _execute(client, "SimRunner", {"new_object_name": "runner_wc", "output_folder": str((temp_dir / "temp_wca").resolve())})
     await _execute(
@@ -110,7 +110,7 @@ async def _scenario_sim_runner_asc_example(client: Client, temp_dir: Path) -> No
     await _execute(
         client,
         "AscEditor",
-        {"new_object_name": "batch_asc", "asc_file": str((TESTFILES / "sallenkey.asc").resolve())},
+        {"new_object_name": "batch_asc", "asc_filename": str((TESTFILES / "sallenkey.asc").resolve())},
     )
     await _execute(client, "set_parameters", {"object_name": "batch_asc", "res": 0, "cap": 0.0001})
     await _execute(client, "set_component_value", {"object_name": "batch_asc", "device": "R1", "value": "4k"})
@@ -123,7 +123,7 @@ async def _scenario_sim_runner_callback_example(client: Client, temp_dir: Path) 
     await _execute(
         client,
         "AscEditor",
-        {"new_object_name": "batch_cb", "asc_file": str((TESTFILES / "sallenkey.asc").resolve())},
+        {"new_object_name": "batch_cb", "asc_filename": str((TESTFILES / "sallenkey.asc").resolve())},
     )
 
 
@@ -152,9 +152,9 @@ async def _scenario_sim_stepper_example(client: Client, temp_dir: Path) -> None:
     await _execute(
         client,
         "AscEditor",
-        {"new_object_name": "step_editor", "asc_file": str((TESTFILES / "sallenkey.asc").resolve())},
+        {"new_object_name": "step_editor", "asc_filename": str((TESTFILES / "sallenkey.asc").resolve())},
     )
-    await _execute(client, "SimStepper", {"new_object_name": "stepper", "circuit": "step_editor", "runner": "runner_step"})
+    await _execute(client, "SimStepper", {"new_object_name": "stepper", "editor": "step_editor", "runner": "runner_step"})
     await _execute(client, "set_parameter", {"object_name": "stepper", "param": "run", "value": 0})
 
 
@@ -172,7 +172,7 @@ async def _scenario_sub_circuit_asc_edits(client: Client, temp_dir: Path) -> Non
     await _execute(
         client,
         "AscEditor",
-        {"new_object_name": "top_circuit", "asc_file": str((TESTFILES / "sallenkey.asc").resolve())},
+        {"new_object_name": "top_circuit", "asc_filename": str((TESTFILES / "sallenkey.asc").resolve())},
     )
     await _execute(client, "get_components", {"object_name": "top_circuit"})
     await _execute(client, "set_component_value", {"object_name": "top_circuit", "device": "R1", "value": 11})

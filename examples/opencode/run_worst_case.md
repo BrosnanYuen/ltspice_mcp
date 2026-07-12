@@ -13,7 +13,7 @@ Replicate README WorstCaseAnalysis workflow through MCP.
 ## Step-by-step
 1. Create AscEditor:
 ```json
-ltspice_mcp_execute {"api_name":"AscEditor","inputs":{"new_object_name":"sallenkey","asc_file":"/tmp/test/sallenkey.asc"}}
+ltspice_mcp_execute {"api_name":"AscEditor","inputs":{"new_object_name":"sallenkey","asc_filename":"/tmp/test/sallenkey.asc"}}
 ```
 2. Create SimRunner:
 ```json
@@ -39,4 +39,3 @@ ltspice_mcp_execute {"api_name":"set_tolerance","inputs":{"object_name":"wca","r
 ltspice_mcp_execute {"api_name":"run_testbench","inputs":{"object_name":"wca"}}
 ```
 7. Poll status only after run_testbench
-

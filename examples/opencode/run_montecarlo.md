@@ -12,7 +12,7 @@ Replicate README Montecarlo setup and execution flow through MCP.
 ## Step-by-step
 1. Create AscEditor object:
 ```json
-ltspice_mcp_execute {"api_name":"AscEditor","inputs":{"new_object_name":"sallenkey","asc_file":"/home/brosnan/ltspice_mcp/ltspice_mcp/testfiles/sallenkey.asc"}}
+ltspice_mcp_execute {"api_name":"AscEditor","inputs":{"new_object_name":"sallenkey","asc_filename":"/home/brosnan/ltspice_mcp/ltspice_mcp/testfiles/sallenkey.asc"}}
 ```
 2. Create SimRunner:
 ```json
@@ -41,4 +41,3 @@ ltspice_mcp_execute {"api_name":"prepare_testbench","inputs":{"object_name":"mc"
 ltspice_mcp_execute {"api_name":"run_testbench","inputs":{"object_name":"mc","runs_per_sim":100}}
 ```
 7. Poll after each call and inspect final status.
-

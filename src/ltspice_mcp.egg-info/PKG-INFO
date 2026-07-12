@@ -1,12 +1,13 @@
 Metadata-Version: 2.4
 Name: ltspice-mcp
-Version: 0.1.0
+Version: 0.1.2
 Summary: Asynchronous MCP server for LTspice using PyLTSpice
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
 License-File: LICENSE
-Requires-Dist: PyLTSpice>=5.5.1
-Requires-Dist: fastmcp>=3.2.4
+Requires-Dist: PyLTSpice>=6.0.1
+Requires-Dist: fastmcp>=3.4.4
+Requires-Dist: electronics-design>=0.1.2
 Provides-Extra: test
 Requires-Dist: pytest>=8.0.0; extra == "test"
 Requires-Dist: pytest-asyncio>=0.23.0; extra == "test"
@@ -41,11 +42,10 @@ Asynchronous MCP server for LTspice + PyLTSpice (`PyLTSpice>=5.5.1`) built with 
 
 ## Quick Setup
 ```bash
-cd /home/brosnan/ltspice_mcp/ltspice_mcp
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -U pip
-pip install "PyLTSpice>=5.5.1" "fastmcp>=3.2.4" pytest pytest-asyncio
+pip install "PyLTSpice>=6.0.1" "fastmcp>=3.4.4" "electronics-design>=0.1.2" pytest pytest-asyncio
 pip install -e .
 ```
 
@@ -169,7 +169,6 @@ Integration tests now include:
 
 ## Run Tests (One By One)
 ```bash
-cd /home/brosnan/ltspice_mcp/ltspice_mcp
 . .venv/bin/activate
 pytest -q tests/unit/test_responses.py
 pytest -q tests/unit/test_config.py

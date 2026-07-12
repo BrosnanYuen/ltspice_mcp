@@ -53,7 +53,7 @@ Error statuses:
 | `Trace` | `name`, `data`, `whattype?` | Create RAW trace. |
 | `SpiceCircuit` | `netlist source/path` | Generic spice circuit API. |
 | `SpiceEditor` | `netlist_file`, `encoding?`, `create_blank?` | Netlist editor. |
-| `AscEditor` | `asc_file`, `encoding?` | LTspice ASC editor. |
+| `AscEditor` | `asc_filename`, `encoding?` | LTspice ASC editor. |
 | `SimRunner` | `simulator?`, `parallel_sims?`, `timeout?`, `verbose?`, `output_folder?` | Batch runner. |
 | `SimCommander` | `netlist_file`, `parallel_sims?`, `timeout?`, `verbose?`, `encoding?`, `simulator?` | Legacy editor+runner. |
 | `LTspice` | none | Return LTspice simulator class. |
@@ -64,7 +64,7 @@ Error statuses:
 | `LTComplex` | ctor args | Complex-value wrapper. |
 | `opLogReader` | `filename` | Parse op-point log sections. |
 | `ProcessCallback` | ctor args | Callback base class. |
-| `SimStepper` | `circuit`, `runner` | Parameter/model sweep controller. |
+| `SimStepper` | `editor`, `runner` | Parameter/model sweep controller. |
 | `Montecarlo` | `circuit_file`, `runner` | Monte Carlo analysis toolkit. |
 | `WorstCaseAnalysis` | `circuit_file`, `runner` | Worst-case analysis toolkit. |
 | `sweep` | `stop` OR `start,stop,step` | Linear sweep iterator. |
@@ -74,6 +74,8 @@ Error statuses:
 | `sweep_iterators` | none | Multi-parameter sweep helper object. |
 | `EncodingDetectError` | ctor args | Encoding exception type. |
 | `detect_encoding` | `file/path`, `encodings?`, `**kwargs` | Detect text encoding. |
+
+MCP argument names follow the PyLTSpice constructor signatures exactly. Use `asc_filename` for `AscEditor` and `editor` for `SimStepper`; legacy aliases are not supported.
 
 ## Method Calls via `execute`
 Server supports direct object method invocation when `inputs.object_name` is present.
@@ -116,7 +118,7 @@ Codex/OpenCode ready recipes:
 {"tool":"runtime_info","arguments":{}}
 ```
 ```json
-{"tool":"execute","arguments":{"api_name":"AscEditor","inputs":{"new_object_name":"sallenkey","asc_file":"/abs/path/testfiles/sallenkey.asc"}}}
+{"tool":"execute","arguments":{"api_name":"AscEditor","inputs":{"new_object_name":"sallenkey","asc_filename":"/abs/path/testfiles/sallenkey.asc"}}}
 ```
 ```json
 {"tool":"execute","arguments":{"api_name":"SimRunner","inputs":{"new_object_name":"runner1","output_folder":"/abs/path/temp_mc"}}}
