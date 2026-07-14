@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ltspice-mcp"
-version = "0.1.2"
+version = "0.1.4"
 description = "Asynchronous MCP server for LTspice using PyLTSpice"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "PyLTSpice>=6.0.1",
   "fastmcp>=3.4.4",
-  "electronics-design>=0.1.2",
+  "electronics-design>=0.1.4",
 ]
 
 [project.optional-dependencies]
