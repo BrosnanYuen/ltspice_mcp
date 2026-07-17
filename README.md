@@ -1,15 +1,8 @@
 # ltspice_mcp
 
-Asynchronous MCP server for LTspice + PyLTSpice (`PyLTSpice>=5.5.1`) built with `fastmcp>=3.2.4`.
+Converts ltspice netlist .net to ltspice .asc file format
 
-## What It Does
-- Exposes exactly 4 MCP tools: `runtime_info`, `execute_status`, `stop_reset`, `execute`
-- Returns `runtime_info` immediately with OS/runtime status
-- Keeps `execute` and `stop_reset` non-blocking (`in progress` response)
-- Runs operations in per-session FIFO queues
-- Sends completion/error notifications to MCP clients
-- Uses only PyLTSpice APIs in server logic (no direct `spicelib` usage)
-- Includes `execute` helper API `traces_to_csv` to export selected traces from `RawRead` objects into per-wave CSV files
+REALTIME LTSpice simulation and export to .csv!
 
 ## Project Layout
 - `src/ltspice_mcp/` server source code
