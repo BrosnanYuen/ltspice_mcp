@@ -4,6 +4,9 @@ Converts ltspice netlist .net to ltspice .asc file format
 
 REALTIME LTSpice simulation and export to .csv!
 
+![Generate LTSpice Circuits using LLMs](./head.png)
+
+
 ## Project Layout
 - `src/ltspice_mcp/` server source code
 - `tests/unit/` unit tests
