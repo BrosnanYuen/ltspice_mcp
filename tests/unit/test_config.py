@@ -66,6 +66,7 @@ def test_convert_settings_are_optional_and_have_defaults():
     assert cfg.convert_settings.grid_size == 16
     assert cfg.convert_settings.autoplace_iter == 12
     assert cfg.convert_settings.ltspice_version == 4.1
+    assert cfg.convert_settings.voltage_must_have_dc is True
 
 
 def test_convert_settings_can_be_partially_overridden():
@@ -74,6 +75,7 @@ def test_convert_settings_can_be_partially_overridden():
     assert cfg.convert_settings.grid_size == 24
     assert cfg.convert_settings.minimum_dist == 32
     assert cfg.convert_settings.autoplace_iter == 12
+    assert cfg.convert_settings.voltage_must_have_dc is True
 
 
 def test_convert_settings_reject_invalid_values():
@@ -83,8 +85,15 @@ def test_convert_settings_reject_invalid_values():
     with pytest.raises(ValueError):
         ServerConfig.model_validate({"convert_settings": {"unknown": 1}})
 
+    with pytest.raises(ValueError):
+        ServerConfig.model_validate({"convert_settings": {"voltage_must_have_dc": "true"}})
+
+    with pytest.raises(ValueError):
+        ServerConfig.model_validate({"convert_settings": {"voltage_must_have_dc": 1}})
+
 
 def test_checked_in_config_loads_with_convert_settings():
     cfg = load_config(Path(__file__).parents[2] / "config.json")
 
     assert cfg.convert_settings.grid_size == 16
+    assert cfg.convert_settings.voltage_must_have_dc is True

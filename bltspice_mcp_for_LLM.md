@@ -83,6 +83,8 @@ For `ltspice_netlist_to_asc`, `convert_settings` is optional in `inputs`. When
 it is omitted, the server uses the optional `convert_settings` section from
 `config.json`, including defaults for every setting. Values supplied in a
 request override the configured values for that request.
+`voltage_must_have_dc` defaults to `true`, must be a JSON boolean, and is
+forwarded to `ltspice_netlist_to_asc` inside `convert_settings`.
 
 ## Method Calls via `execute`
 Server supports direct object method invocation when `inputs.object_name` is present.

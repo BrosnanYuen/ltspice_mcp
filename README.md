@@ -53,7 +53,8 @@ pip install -e .
     "wire_pin_out_dist": 16,
     "grid_size": 16,
     "autoplace_iter": 12,
-    "ltspice_version": 4.1
+    "ltspice_version": 4.1,
+    "voltage_must_have_dc": true
   }
 }
 ```
@@ -161,6 +162,8 @@ The following `electronics-design` APIs are available through `execute`:
 `ltspice_netlist_to_asc` receives the configured `convert_settings` automatically.
 A request may include an `inputs.convert_settings` object to override individual
 values for that call. `is_valid_ltspice_netlist_file` only requires its filepath.
+`voltage_must_have_dc` must be a JSON boolean and is passed to
+`ltspice_netlist_to_asc` inside `convert_settings`.
 
 ## `run_ltspice_to_csv.py` Equivalent MCP Flow
 Equivalent artifacts are included for the op-amp example workflow:

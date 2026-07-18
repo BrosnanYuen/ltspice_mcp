@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from urllib.parse import urlparse
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator
 
 
 DEFAULT_CONVERT_SETTINGS = {
@@ -16,6 +16,7 @@ DEFAULT_CONVERT_SETTINGS = {
     "grid_size": 16,
     "autoplace_iter": 12,
     "ltspice_version": 4.1,
+    "voltage_must_have_dc": True,
 }
 
 
@@ -34,6 +35,9 @@ class ConvertSettings(BaseModel):
     grid_size: int = Field(default=16, gt=0)
     autoplace_iter: int = Field(default=12, gt=0)
     ltspice_version: float = Field(default=4.1, gt=0)
+    voltage_must_have_dc: StrictBool = Field(
+        default=DEFAULT_CONVERT_SETTINGS["voltage_must_have_dc"]
+    )
 
     @field_validator("ltspice_windows_path", "ltspice_wine_path")
     @classmethod

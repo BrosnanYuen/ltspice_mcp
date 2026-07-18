@@ -148,6 +148,7 @@ def test_conversion_api_receives_configured_convert_settings(tmp_path: Path, mon
     assert captured["convert_settings"]["grid_size"] == 16
     assert captured["convert_settings"]["autoplace_iter"] == 12
     assert captured["convert_settings"]["ltspice_version"] == 4.1
+    assert captured["convert_settings"]["voltage_must_have_dc"] is True
     assert captured["convert_settings"]["custom_search_paths"] == [str(tmp_path / "valid_asy")]
     assert captured["convert_settings"]["ltspice_windows_path"] == "C:\\users\\brosnan\\AppData\\Local\\LTspice\\"
 
@@ -174,6 +175,7 @@ def test_netlist_to_asc_uses_checked_in_config_by_default(tmp_path: Path, monkey
     assert captured["convert_settings"]["grid_size"] == 16
     assert captured["convert_settings"]["autoplace_iter"] == 12
     assert captured["convert_settings"]["ltspice_version"] == 4.1
+    assert captured["convert_settings"]["voltage_must_have_dc"] is True
 
 
 def test_netlist_validator_does_not_receive_convert_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
@@ -208,10 +210,38 @@ def test_conversion_request_settings_override_configured_defaults(tmp_path: Path
         {
             "netlist_filepath": "input.net",
             "asc_filepath_out": "output.asc",
-            "convert_settings": {"minimum_dist": 8, "autoplace_iter": 3},
+            "convert_settings": {
+                "minimum_dist": 8,
+                "autoplace_iter": 3,
+                "voltage_must_have_dc": False,
+            },
         },
     )
 
     assert captured["convert_settings"]["minimum_dist"] == 8
     assert captured["convert_settings"]["autoplace_iter"] == 3
     assert captured["convert_settings"]["wire_pin_out_dist"] == 16
+    assert captured["convert_settings"]["voltage_must_have_dc"] is False
+
+
+@pytest.mark.parametrize("invalid_value", ["true", 1, 0, None])
+def test_conversion_request_rejects_non_bool_voltage_must_have_dc(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    invalid_value,
+):
+    def fake_converter(**kwargs):
+        return True, "OK", 0
+
+    monkeypatch.setitem(CONVERSION_CALLABLES, "ltspice_netlist_to_asc", fake_converter)
+    d = ApiDispatcher(config=_config(tmp_path), project_root=tmp_path)
+
+    with pytest.raises(ValueError):
+        d.execute_api(
+            "ltspice_netlist_to_asc",
+            {
+                "netlist_filepath": "input.net",
+                "asc_filepath_out": "output.asc",
+                "convert_settings": {"voltage_must_have_dc": invalid_value},
+            },
+        )

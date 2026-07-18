@@ -172,6 +172,8 @@ class ApiDispatcher:
         else:
             raise ValueError("convert_settings must be a JSON object")
 
+        effective_settings = ConvertSettings.model_validate(effective_settings).model_dump()
+
         return {
             **kwargs,
             "convert_settings": self._normalize_convert_settings(effective_settings),
